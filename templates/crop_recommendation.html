@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation - GreenGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation" class="active">Crop Recommendation</a></li>
+                <li><a href="/disease-detection">Disease Detection</a></li>
+                <li><a href="/chatbot">Chatbot</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Crop Recommendation</h1>
+                <p>Get AI-powered crop suggestions based on your soil composition and local climate</p>
+            </div>
+        </section>
+
+        <section class="input-form">
+            <div class="container">
+                <h2>Enter Soil & Climate Parameters</h2>
+                <form id="crop-recommendation-form" action="/predict-crop" method="POST">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nitrogen">Nitrogen (N) in kg/ha</label>
+                            <input type="number" id="nitrogen" name="nitrogen" min="0" max="200" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phosphorus">Phosphorus (P) in kg/ha</label>
+                            <input type="number" id="phosphorus" name="phosphorus" min="0" max="200" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="potassium">Potassium (K) in kg/ha</label>
+                            <input type="number" id="potassium" name="potassium" min="0" max="200" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">Temperature (°C)</label>
+                            <input type="number" id="temperature" name="temperature" min="0" max="50" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="humidity">Humidity (%)</label>
+                            <input type="number" id="humidity" name="humidity" min="0" max="100" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ph">pH value</label>
+                            <input type="number" id="ph" name="ph" min="0" max="14" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rainfall">Rainfall (mm)</label>
+                            <input type="number" id="rainfall" name="rainfall" min="0" max="5000" step="0.1" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Get Crop Recommendations</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <div class="container">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="icon">🌱</div>
+                        <h3>Soil Analysis</h3>
+                        <p>Our system analyzes N-P-K values and other soil parameters to find the perfect crops for your land.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">🌦️</div>
+                        <h3>Climate Optimized</h3>
+                        <p>Get crop suggestions optimized for your local temperature, humidity, and rainfall patterns.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">📈</div>
+                        <h3>Higher Yields</h3>
+                        <p>Farmers using our recommendations report up to 30% higher yields compared to traditional methods.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GreenGuard - Smart Crop Recommendations</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!-- templates/disease_detection.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Detection - GreenGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-detection" class="active">Disease Detection</a></li>
+                <li><a href="/chatbot">Chatbot</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Plant Disease Detection</h1>
+                <p>Upload an image of your plant leaf to detect diseases using AI</p>
+            </div>
+        </section>
+
+        <section class="input-form">
+            <div class="container">
+                <h2>Upload Plant Image</h2>
+                <form action="/predict-disease" method="POST" enctype="multipart/form-data" id="disease-detection-form">
+                    <div class="file-upload-container">
+                        <label for="plant_image" class="file-upload-label">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">Choose an image or drag and drop</div>
+                            <div class="file-info">Supported formats: JPG, JPEG, PNG</div>
+                        </label>
+                        <input type="file" id="plant_image" name="plant_image" accept=".jpg,.jpeg,.png" required class="file-input">
+                        <div class="file-preview">
+                            <img id="image-preview" src="#" alt="Preview" style="display: none;">
+                            <div id="file-name"></div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Detect Disease</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <div class="container">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="icon">🔬</div>
+                        <h3>AI Powered</h3>
+                        <p>Our disease detection uses deep learning technology to accurately identify plant diseases.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">📋</div>
+                        <h3>Treatment Guide</h3>
+                        <p>Get practical treatment and prevention recommendations for identified diseases.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">⚡</div>
+                        <h3>Instant Results</h3>
+                        <p>Get results instantly to help you take quick action to protect your crops.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GreenGuard - Smart Crop Recommendations</p>
+        </div>
+    </footer>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('plant_image');
+        const imagePreview = document.getElementById('image-preview');
+        const fileName = document.getElementById('file-name');
+        const form = document.getElementById('disease-detection-form');
+        
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.addEventListener('load', function() {
+                    imagePreview.setAttribute('src', this.result);
+                    imagePreview.style.display = 'block';
+                    fileName.textContent = file.name;
+                });
+                
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            const file = fileInput.files[0];
+            if (!file) {
+                e.preventDefault();
+                alert('Please select an image file');
+                return false;
+            }
+            // Make sure form explicitly submits to the correct endpoint
+            this.action = '/predict-disease';
+            this.method = 'POST';
+            this.enctype = 'multipart/form-data';
+        });
+    });
+    </script>
+
+    
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

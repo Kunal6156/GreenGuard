@@ -1,0 +1,143 @@
+<!-- templates/crop_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation Results - AgriSens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>AgriSens</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation" class="active">Crop Recommendation</a></li>
+                <li><a href="/disease-detection">Disease Detection</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero result-hero">
+            <div class="hero-content">
+                <h1>Your Crop Recommendations</h1>
+                <p>Based on your soil composition and climate parameters</p>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div class="container">
+                <div class="result-summary">
+                    <h2>Recommended Crop: <span class="highlight">{{ crop_name }}</span></h2>
+                    <div class="confidence">Confidence: {{ confidence }}%</div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card primary">
+                        <div class="icon">🌾</div>
+                        <h3>{{ crop_name }}</h3>
+                        <p>{{ crop_description }}</p>
+                        <div class="growing-details">
+                            <h4>Growing Requirements:</h4>
+                            <ul>
+                                <li>Soil pH: {{ crop_ph_range }}</li>
+                                <li>Temperature: {{ crop_temp_range }}°C</li>
+                                <li>Growing Season: {{ crop_season }}</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="parameters-card">
+                        <h3>Your Input Parameters</h3>
+                        <div class="parameter-list">
+                            <div class="parameter">
+                                <span class="param-name">Nitrogen:</span>
+                                <span class="param-value">{{ nitrogen }} kg/ha</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">Phosphorus:</span>
+                                <span class="param-value">{{ phosphorus }} kg/ha</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">Potassium:</span>
+                                <span class="param-value">{{ potassium }} kg/ha</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">Temperature:</span>
+                                <span class="param-value">{{ temperature }}°C</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">Humidity:</span>
+                                <span class="param-value">{{ humidity }}%</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">pH Value:</span>
+                                <span class="param-value">{{ ph }}</span>
+                            </div>
+                            <div class="parameter">
+                                <span class="param-name">Rainfall:</span>
+                                <span class="param-value">{{ rainfall }} mm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alternative-crops">
+                    <h3>Alternative Crops to Consider</h3>
+                    <div class="alt-crop-grid">
+                        {% for crop in alternative_crops %}
+                        <div class="alt-crop">
+                            <h4>{{ crop.name }}</h4>
+                            <p>{{ crop.description }}</p>
+                            <div class="match">{{ crop.match }}% match</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="/crop-recommendation" class="btn secondary">Try Different Parameters</a>
+                    <a href="/crop-details/{{ crop_id }}" class="btn primary">View Detailed Growing Guide</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="info-section">
+            <div class="container">
+                <h2>Next Steps</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="icon">🚜</div>
+                        <h3>Land Preparation</h3>
+                        <p>Get guidance on preparing your land for the recommended crop.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">💧</div>
+                        <h3>Irrigation Planning</h3>
+                        <p>Plan your watering schedule based on the crop's requirements.</p>
+                    </div>
+                    <div class="info-card">
+                        <div class="icon">📊</div>
+                        <h3>Market Analysis</h3>
+                        <p>Check current market rates and demand for your recommended crop.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 AgriSens - Smart Crop Recommendations</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

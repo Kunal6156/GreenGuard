@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - GreenGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-detection">Disease Detection</a></li>
+                <li><a href="/chatbot">Chatbot</a></li>
+                <li><a href="/about" class="active">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>About GreenGuard</h1>
+                <p>Our mission is to empower farmers with technology and data-driven insights</p>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <div class="container">
+                <div class="about-content">
+                    <h2 class="section-title">Our Story</h2>
+                    <p>GreenGuard was founded with a simple yet powerful vision: to bridge the gap between cutting-edge technology and traditional farming practices. We believe that by providing farmers with accessible AI-powered tools, we can help improve crop yields, reduce losses due to disease, and promote sustainable farming practices.</p>
+                    
+                    <div class="about-image">
+                        <img src="../static/images/image.png" alt="GreenGuard team in the field">
+                    </div>
+                    
+                    <h3>How We Started</h3>
+                    <p>The idea for GreenGuard was born when our founder, a computer scientist with farming roots, witnessed firsthand the challenges faced by his family's farm. Despite decades of experience, they struggled with unpredictable weather patterns, pest infestations, and choosing the right crops for changing soil conditions.</p>
+                    
+                    <p>This led to a simple question: What if farmers could leverage the power of data science and machine learning to make more informed decisions?</p>
+                    
+                    <h3>Our Technology</h3>
+                    <p>GreenGuard combines expertise in agriculture, data science, and artificial intelligence to create practical tools for farmers. Our crop recommendation system analyzes soil parameters, climate data, and other environmental factors to suggest the most suitable crops for a particular field. Meanwhile, our disease detection system uses computer vision and deep learning to identify plant diseases from images with high accuracy.</p>
+                    
+                    <h3>Our Impact</h3>
+                    <p>Since our launch, we've helped thousands of farmers across India make better agricultural decisions, resulting in improved yields and reduced crop losses. We're particularly proud of our work with small-scale farmers, who have historically had limited access to advanced agricultural technologies.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="team-section">
+            <div class="container">
+                <h2 class="section-title">Our Team</h2>
+                <div class="team-grid">
+                    <div class="team-member">
+                        <img src="{{ url_for('static', filename='images/team1.jpg') }}" alt="Team Member">
+                        <h3>Dr. Amit Kumar</h3>
+                        <p>Founder & Agricultural Scientist</p>
+                        <p>With over 15 years of experience in agricultural research, Dr. Kumar leads our crop recommendation systems.</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="{{ url_for('static', filename='images/team2.jpg') }}" alt="Team Member">
+                        <h3>Priya Sharma</h3>
+                        <p>AI Research Lead</p>
+                        <p>Priya specializes in computer vision and leads our disease detection model development.</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="{{ url_for('static', filename='images/team3.jpg') }}" alt="Team Member">
+                        <h3>Rajiv Patel</h3>
+                        <p>Software Engineer</p>
+                        <p>Rajiv develops our web application and ensures our technology is accessible to farmers everywhere.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Join the Agricultural Revolution</h2>
+                    <p>Start using GreenGuard today and see how technology can transform your farming practices.</p>
+                    <div class="cta-buttons">
+                        <a href="/crop-recommendation" class="btn primary-btn">Try Crop Recommendation</a>
+                        <a href="/disease-detection" class="btn outline-btn">Try Disease Detection</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>GreenGuard</h2>
+                    <p>Smart Agriculture Solutions</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h3>Features</h3>
+                        <ul>
+                            <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                            <li><a href="/disease-detection">Disease Detection</a></li>
+                            <li><a href="#">Farm Analytics</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>Resources</h3>
+                        <ul>
+                            <li><a href="#">Blog</a></li>
+                            <li><a href="#">Research</a></li>
+                            <li><a href="#">FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>Contact</h3>
+                        <ul>
+                            <li><a href="mailto:info@GreenGuard.com">info@GreenGuard.com</a></li>
+                            <li><a href="tel:+911234567890">+91 123 456 7890</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GreenGuard - Smart Crop Recommendations. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

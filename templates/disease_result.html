@@ -1,0 +1,80 @@
+<!-- templates/disease_result.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Detection Result - GreenGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-detection">Disease Detection</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="result-section">
+            <div class="container">
+                <div class="result-card">
+                    <h2>Disease Detection Result</h2>
+                    <div class="result-content">
+                        <div class="result-image">
+                            <img src="{{ url_for('static', filename=image_path) }}" alt="Plant Image">
+                        </div>
+                        <div class="result-details">
+                            <h3>Detected Condition: <span class="highlight">{{ prediction }}</span></h3>
+                            <div class="confidence-meter">
+                                <span>Confidence: {{ confidence|round(1) }}%</span>
+                                <div class="meter">
+                                    <div class="meter-fill" style="width: {{ confidence }}%;"></div>
+                                </div>
+                            </div>
+                            <div class="details-grid">
+                                <div class="detail-item">
+                                    <h4>Description</h4>
+                                    <p>{{ disease_details.description }}</p>
+                                </div>
+                                <div class="detail-item">
+                                    <h4>Symptoms</h4>
+                                    <p>{{ disease_details.symptoms }}</p>
+                                </div>
+                                <div class="detail-item">
+                                    <h4>Treatment</h4>
+                                    <p>{{ disease_details.treatment }}</p>
+                                </div>
+                                <div class="detail-item">
+                                    <h4>Prevention</h4>
+                                    <p>{{ disease_details.prevention }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <a href="/disease-detection" class="btn primary-btn">Analyze Another Image</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GreenGuard - Smart Crop Recommendations</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

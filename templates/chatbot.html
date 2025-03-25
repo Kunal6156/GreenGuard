@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenGuard Multilingual AI Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .logo h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-links li {
+            margin-left: 25px;
+        }
+        
+        .nav-links li a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links li a:hover {
+            color: #4CAF50;
+        }
+        
+        .nav-links li a.active {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .main-content {
+            padding: 40px 0;
+        }
+        
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .main-content > p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .chat-container {
+            max-width: 700px;
+            margin: 20px auto;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background-color: #ffffff;
+        }
+        
+        .chat-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 18px;
+            font-weight: 600;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        
+        .message {
+            margin-bottom: 18px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 75%;
+            clear: both;
+            line-height: 1.4;
+        }
+        
+        .bot-message {
+            background-color: #e3f2fd;
+            float: left;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .user-message {
+            background-color: #e8f5e9;
+            float: right;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-right: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+        }
+        
+        .chat-input button {
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        
+        .chat-input button:hover {
+            background-color: #43a047;
+        }
+        
+        .clear {
+            clear: both;
+        }
+        
+        .suggestions {
+            max-width: 700px;
+            margin: 30px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .suggestions h3 {
+            color: #4CAF50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 10px;
+        }
+        
+        .suggestions li {
+            background-color: #f1f8e9;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .suggestions li:hover {
+            background-color: #dcedc8;
+        }
+        
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .suggestions ul {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+        .ai-source {
+            text-align: right;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .gemini-badge {
+            background-color: #4285F4;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .language-btn {
+            background-color: #f1f1f1;
+            border: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .language-btn.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                <li><a href="/disease-detection">Disease Detection</a></li>
+                <li><a href="#" class="active"><i class="fas fa-robot"></i></a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="main-content">
+            <h2>AI Agricultural Assistant</h2>
+            
+            <!-- Language Selector -->
+            <div class="language-selector">
+                <button class="language-btn active" data-lang="en">English</button>
+                <button class="language-btn" data-lang="hi">हिन्दी</button>
+                <button class="language-btn" data-lang="ta">தமிழ்</button>
+                <button class="language-btn" data-lang="bn">বাংলা</button>
+                <button class="language-btn" data-lang="kn">ಕನ್ನಡ</button>
+            </div>
+            
+            <p>Ask me about crops, diseases, farming practices, or get personalized assistance for your farm.</p>
+            
+            <div class="chat-container">
+                <div class="chat-header">
+                    GreenGuard Bot <span class="gemini-badge">Powered by Gemini</span>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot-message">
+                        Hello! I'm your GreenGuard AI assistant. How can I help with your farming needs today?
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="userInput" placeholder="Type your message here..." autocomplete="off">
+                    <button id="sendBtn">Send</button>
+                </div>
+            </div>
+            
+            <div class="suggestions">
+                <h3>Try asking about:</h3>
+                <ul id="suggestionsList">
+                    <!-- Suggestions will be dynamically populated based on language -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>GreenGuard</h2>
+                <p>Smart Farming Solutions</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h3>Features</h3>
+                    <ul>
+                        <li><a href="/crop-recommendation">Crop Recommendation</a></li>
+                        <li><a href="/disease-detection">Disease Detection</a></li>
+                        <li><a href="#" class="active"><i class="fas fa-robot"></i> AI Assistant</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Research</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li><a href="mailto:kunalmr2003@gmail.com">kunalmr2003@gmail.com</a></li>
+                        <li><a href="tel:+919318483735">+91 9318483735</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 GreenGuard - Smart Farming Solutions. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@google/generative-ai/dist/index.min.js"></script>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chatMessages');
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const languageButtons = document.querySelectorAll('.language-btn');
+            const suggestionsList = document.getElementById('suggestionsList');
+
+            // Multilingual Suggestions
+            const suggestions = {
+                en: [
+                    'What crops would suit my land?',
+                    'How can I identify plant diseases?',
+                    'What are some tips for soil health?',
+                    'Best practices for organic farming?'
+                ],
+                hi: [
+                    'मेरी भूमि के लिए कौन से फसलें उपयुक्त होंगी?',
+                    'पौधों की बीमारियों को कैसे पहचानूं?',
+                    'मिट्टी के स्वास्थ्य के लिए क्या टिप्स हैं?',
+                    'जैविक खेती के सर्वोत्तम तरीके?'
+                ],
+                ta: [
+                    'எனது நிலத்திற்கு எந்த பயிர்கள் பொருத்தமாக இருக்கும்?',
+                    'தாவர நோய்களை எப்படி அடையாளம் காணுவது?',
+                    'மண் ஆரோக்கியத்திற்கான சில குறிப்புகள்?',
+                    'சுயசார்பு விவசாயத்திற்கான சிறந்த நடைமுறைகள்?'
+                ],
+                bn: [
+                    'আমার জমির জন্য কী ফসল উপযুক্ত হবে?',
+                    'কীভাবে গাছের রোগ চিহ্নিত করবেন?',
+                    'মাটির স্বাস্থ্যের জন্য কিছু পরামর্শ?',
+                    'সেদ্ধ উত্পাদনের সর্বোত্তম অনুশীলন?'
+                ],
+                kn: [
+                    'ನನ್ನ ಭೂಮಿಗೆ ಯಾವ ಬೆಳೆಗಳು 합당ಗಳಾಗಿವೆ?',
+                    'ಸಸ್ಯಗಳ ರೋಗಗಳನ್ನು ಹೇಗೆ ಗುರುತಿಸಬಹುದು?',
+                    'ಮಣ್ಣಿನ ಆರೋಗ್ಯಕ್ಕೆ ಕೆಲವು ಸಲಹೆಗಳೇನು?',
+                    'ಹೊಸ ಬೆಳೆ ಉತ್ಪಾದನೆಯ ಅಭ್ಯಾಸಗಳು?'
+                ]
+            };
+
+            // Localization Messages
+            const localizedMessages = {
+                en: {
+                    welcome: "Hello! I'm your GreenGuard AI assistant. How can I help with your farming needs today?",
+                    errorMessage: 'Sorry, I encountered an error. Please try again later.'
+                },
+                hi: {
+                    welcome: 'नमस्ते! मैं आपका GreenGuard AI सहायक हूँ। आज आपकी खेती की जरूरतों में मैं कैसे मदद कर सकता हूँ?',
+                    errorMessage: 'क्षमा करें, मुझे एक त्रुटि मिली। कृपया बाद में पुनः प्रयास करें।'
+                },
+                ta: {
+                    welcome: 'வணக்கம்! நான் உங்கள் GreenGuard AI உதவியாளர். இன்று உங்கள் வேளாண் தேவைகளில் எப்படி உதவ முடியும்?',
+                    errorMessage: 'மன்னிக்கவும், ஒரு பிழை ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.'
+                },
+                bn: {
+                    welcome: 'হ্যালো! আমি আপনার GreenGuard AI সহায়ক। আজ আপনার কৃষি চাহিদায় কীভাবে সাহায্য করতে পারি?',
+                    errorMessage: 'দুঃখিত, একটি ত্রুটি ঘটেছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।'
+                },
+                kn: {
+                    welcome: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ GreenGuard AI ಸಹಾಯಕ. ಇಂದು ನಿಮ್ಮ ಕೃಷಿ ಅಗತ್ಯಗಳಲ್ಲಿ ಹೇಗೆ ನೆರವಾಗಬಹುದು?',
+                    errorMessage: 'ಕ್ಷಮಿಸಿ, ಒಂದು ದೋಷ ಎದುರಾಗಿದೆ. ದಯವಿಟ್ಟು ಮೊದಲಿನಂತೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'
+                }
+            };
+
+            let currentLanguage = 'en';
+
+            // Function to update suggestions and welcome message
+            function updateLanguage(lang) {
+                currentLanguage = lang;
+                suggestionsList.innerHTML = '';
+                suggestions[lang].forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    li.onclick = () => {
+                        userInput.value = suggestion;
+                        userInput.focus();
+                    };
+                    suggestionsList.appendChild(li);
+                });
+
+                // Reset chat with welcome message in selected language
+                chatMessages.innerHTML = `
+                    <div class="message bot-message">
+                        ${localizedMessages[lang].welcome}
+                    </div>
+                    <div class="clear"></div>
+                `;
+            }
+
+            // Language button event listeners
+            languageButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    languageButtons.forEach(b => b.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update language
+                    updateLanguage(this.dataset.lang);
+                });
+            });
+
+            // Initial language setup
+            updateLanguage('en');
+
+            // Function to add a message to the chat
+            function addMessage(message, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+                messageDiv.innerHTML = message;
+                
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'ai-source';
+                sourceDiv.innerHTML = isUser ? '' : '<span class="gemini-badge">Gemini</span>';
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.appendChild(sourceDiv);
+                chatMessages.appendChild(document.createElement('div')).className = 'clear';
+                
+                // Auto scroll to the bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            // Function to send message to server
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+                
+                // Add user message to chat
+                addMessage(message, true);
+                
+                // Clear input
+                userInput.value = '';
+                
+                try {
+                    // Send message to Flask backend
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            message: message,
+                            language: currentLanguage 
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Add bot response to chat
+                    addMessage(data.response, false);
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage(localizedMessages[currentLanguage].errorMessage, false);
+                }
+            }
+            
+            // Event listeners
+            sendBtn.addEventListener('click', sendMessage);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            // Focus input on load
+            userInput.focus();
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - GreenGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>GreenGuard</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/about" class="active">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="about-section">
+            <div class="container">
+                <h1>About GreenGuard</h1>
+                <div class="about-content">
+                    <div class="about-text">
+                        <h2>Our Mission</h2>
+                        <p>GreenGuard aims to provide farmers and agricultural professionals with data-driven crop recommendations to optimize yields and promote sustainable farming practices.</p>
+                        
+                        <h2>How It Works</h2>
+                        <p>Our system uses machine learning algorithms to analyze soil nutrients, pH levels, and environmental factors to recommend the most suitable crops for your specific conditions.</p>
+                        
+                        <h2>The Technology</h2>
+                        <p>The crop recommendation system is powered by a Random Forest model trained on a dataset of 2,200 soil samples and their corresponding successful crops. Our model achieves an accuracy rate of over 95% in predicting optimal crop selection.</p>
+                    </div>
+                    
+                    <div class="about-info">
+                        <div class="info-box">
+                            <h3>Model Accuracy</h3>
+                            <div class="model-accuracy">
+                                <div class="model-bar">
+                                    <div class="model-type">Random Forest</div>
+                                    <div class="model-score" style="width: 99%;">99%</div>
+                                </div>
+                                <div class="model-bar">
+                                    <div class="model-type">XGBoost</div>
+                                    <div class="model-score" style="width: 98%;">98%</div>
+                                </div>
+                                <div class="model-bar">
+                                    <div class="model-type">SVM</div>
+                                    <div class="model-score" style="width: 97%;">97%</div>
+                                </div>
+                                <div class="model-bar">
+                                    <div class="model-type">Naive Bayes</div>
+                                    <div class="model-score" style="width: 96%;">96%</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box">
+                            <h3>Dataset Information</h3>
+                            <ul>
+                                <li><strong>Total Samples:</strong> 2,200</li>
+                                <li><strong>Features:</strong> 7 (N, P, K, Temperature, Humidity, pH, Rainfall)</li>
+                                <li><strong>Crop Varieties:</strong> 22</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GreenGuard - Smart Crop Recommendations</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
