@@ -17,7 +17,7 @@ from urllib.parse import quote
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-GEMINI_API_KEY ='your Gemini key'  # Replace with your real API key
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')  # Replace with your real API key
 genai.configure(api_key=GEMINI_API_KEY)
 if not GEMINI_API_KEY:
     logger.warning("Gemini API Key not found. Some features may not work.")
