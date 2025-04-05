@@ -1,0 +1,9 @@
+flask
+numpy
+tensorflow-cpu  # Use tensorflow-cpu to reduce deployment size
+opencv-python-headless
+scikit-learn
+pillow
+google-generativeai
+requests
+gunicorn
