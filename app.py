@@ -10,6 +10,10 @@ import logging
 import random
 import google.generativeai as genai
 from deep_translator import GoogleTranslator
+import requests
+import json
+import html
+from urllib.parse import quote
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -242,10 +246,205 @@ def home():
 @app.route('/chatbot')
 def chatbot():
     return render_template('chatbot.html')
+# Add these imports at the top of your app.py file
+
+
+# Replace the deep_translator implementation with a direct API call to Google Translate
+import requests
+from urllib.parse import unquote
+import logging
+
+def translate_text(text, source_lang="auto", target_lang="en"):
+    """
+    Translates text using MyMemory Translation API.
+    Handles various edge cases and encoding issues.
+    
+    Args:
+        text (str): Text to translate
+        source_lang (str): Source language code (e.g., 'hi' for Hindi, 'auto' for auto-detect)
+        target_lang (str): Target language code (e.g., 'en' for English)
+        
+    Returns:
+        str: Translated text or original text if translation fails
+    """
+    try:
+        # Handle URL-encoded text
+        if '%' in text:
+            text = unquote(text)
+        
+        # Log the translation attempt with sample of text
+        logging.info(f"Attempting to translate from {source_lang} to {target_lang}")
+        logging.debug(f"Original text (first 100 chars): {text[:100]}...")
+        
+        # Convert "auto" to appropriate format for MyMemory API
+        langpair = f"{source_lang}|{target_lang}"
+        if source_lang == "auto":
+            langpair = f"|{target_lang}"
+        
+        # API endpoint
+        url = "https://api.mymemory.translated.net/get"
+        
+        # Parameters
+        params = {
+            "q": text,
+            "langpair": langpair,
+            "de": "your@email.com"  # Optional: Add your email for higher usage limits
+        }
+        
+        # Make GET request with a timeout
+        response = requests.get(
+            url, 
+            params=params,
+            timeout=15
+        )
+        
+        # Debug log response details
+        logging.debug(f"Response status code: {response.status_code}")
+        logging.debug(f"Response headers: {response.headers}")
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Log successful response sample
+            logging.debug(f"Raw response sample: {response.text[:200]}...")
+            
+            # Parse the response
+            result = response.json()
+            
+            # Extract the translated text
+            if result and "responseData" in result and "translatedText" in result["responseData"]:
+                translated_text = result["responseData"]["translatedText"]
+                
+                # Check if we got a valid translation
+                if translated_text and len(translated_text.strip()) > 0:
+                    logging.info("Translation successful")
+                    logging.debug(f"Translated text (first 100 chars): {translated_text[:100]}...")
+                    return translated_text
+            
+            # Check for matches if responseData didn't work
+            if result and "matches" in result and len(result["matches"]) > 0:
+                for match in result["matches"]:
+                    if "translation" in match and match["translation"]:
+                        logging.info("Translation found in matches")
+                        return match["translation"]
+            
+            logging.warning("Translation returned empty result")
+            return text
+        else:
+            logging.error(f"Translation API returned status code: {response.status_code}")
+            logging.error(f"Response content: {response.text}")
+            return text
+            
+    except Exception as e:
+        logging.error(f"Translation error: {str(e)}")
+        return text
+
+# Function for fallback to another endpoint or method
+def translate_text_fallback(text, source_lang="auto", target_lang="en"):
+    """
+    Alternative implementation using LibreTranslate API as fallback.
+    Requires a LibreTranslate instance or API key for production use.
+    """
+    try:
+        # Handle URL-encoded text
+        if '%' in text:
+            text = unquote(text)
+            
+        logging.info(f"Attempting fallback translation from {source_lang} to {target_lang}")
+        
+        # Try using alternative MyMemory endpoint
+        url = "https://api.mymemory.translated.net/get"
+        
+        # Convert "auto" to appropriate format
+        if source_lang == "auto":
+            # Try with empty source language
+            langpair = f"|{target_lang}"
+        else:
+            langpair = f"{source_lang}|{target_lang}"
+        
+        # Parameters with different approach
+        params = {
+            "q": text,
+            "langpair": langpair,
+            "mt": "1",  # Force machine translation
+            "de": "your@email.com"  # Optional: Add your email for higher usage limits
+        }
+        
+        # Make GET request with a timeout
+        response = requests.get(
+            url, 
+            params=params,
+            timeout=15
+        )
+        
+        # Check if the request was successful
+        if response.status_code == 200:
+            # Parse the response
+            result = response.json()
+            
+            # Extract the translated text
+            if result and "responseData" in result and "translatedText" in result["responseData"]:
+                translated_text = result["responseData"]["translatedText"]
+                if translated_text and len(translated_text.strip()) > 0:
+                    logging.info("Fallback translation successful")
+                    return translated_text
+            
+            # Check for matches
+            if result and "matches" in result and len(result["matches"]) > 0:
+                for match in result["matches"]:
+                    if "translation" in match and match["translation"]:
+                        return match["translation"]
+                        
+            logging.warning("Fallback translation returned empty result")
+            return text
+        else:
+            logging.error(f"Fallback translation API returned status code: {response.status_code}")
+            return text
+            
+    except Exception as e:
+        logging.error(f"Fallback translation error: {str(e)}")
+        return text
+
+# Function to detect language and handle translation with fallbacks
+def robust_translate(text, target_lang="en"):
+    """
+    More robust translation function with fallbacks.
+    Use this if you're having persistent issues with the basic functions.
+    """
+    # First try standard method
+    translated = translate_text(text, "auto", target_lang)
+    
+    # If result is same as input (indicates possible failure)
+    if translated == text or (translated.count('%') > 5):
+        logging.warning("Primary translation failed or returned original text, trying fallback method")
+        translated = translate_text_fallback(text, "auto", target_lang)
+    
+    # If still having issues, try with another approach
+    if translated == text or (translated.count('%') > 5):
+        try:
+            # Try to detect language first using MyMemory
+            detect_url = "https://api.mymemory.translated.net/get"
+            detect_params = {
+                "q": text[:100],  # Use just beginning of text for detection
+                "langpair": f"|en"  # Empty source language for detection
+            }
+            detect_response = requests.get(detect_url, params=detect_params, timeout=5)
+            if detect_response.status_code == 200:
+                result = detect_response.json()
+                if "responseData" in result and "detectedLanguage" in result["responseData"]:
+                    detected_lang = result["responseData"]["detectedLanguage"]
+                    logging.info(f"Detected language: {detected_lang}")
+                    # Try again with explicit source language
+                    translated = translate_text(text, detected_lang, target_lang)
+        except Exception as e:
+            logging.error(f"Language detection error: {str(e)}")
+    
+    return translated
+
+# Update the chat route to use this new translation function
 @app.route('/api/chat', methods=['POST'])
 def chat():
     try:
-        data = request.json
+        data = request.get_json()
         user_message = data.get('message', '')
         language = data.get('language', 'en')
         
@@ -254,14 +453,19 @@ def chat():
         
         logger.info(f"Chat message received: {user_message} in language: {language}")
         
+        # Store original message
+        original_message = user_message
+        
+        # Translate to English if not already in English
+        if language != 'en':
+            try:
+                user_message = translate_text(user_message, source_lang=language, target_lang='en')
+                logger.info(f"Translated user message: {user_message}")
+            except Exception as e:
+                logger.error(f"Error translating user message: {e}")
+                user_message = original_message
+        
         try:
-            # Translate input to English if not already in English
-            if language != 'en':
-                try:
-                    user_message = GoogleTranslator(source=language, target='en').translate(user_message)
-                except Exception as translation_error:
-                    logger.warning(f"Translation error: {translation_error}")
-            
             # Use Gemini for generating responses
             model = genai.GenerativeModel('gemini-1.5-pro-latest')
             prompt = f"""
@@ -272,22 +476,31 @@ def chat():
             
             User's message: {user_message}
             """
+            
             logger.info(f"Sending request to Gemini: {user_message}")
             response = model.generate_content(prompt)
-            logger.info(f"Gemini response: {response.text}")
+            logger.info(f"Gemini response received: {len(response.text)} characters")
             
-            response = model.generate_content(prompt)
             bot_response = response.text
+            if not bot_response or len(bot_response.strip()) == 0:
+                logger.warning("Gemini response empty, using fallback knowledge base")
+                intent, details = enhanced_intent_recognition(user_message)
+                responses = chatbot_knowledge.get(intent, chatbot_knowledge["default"])
+                bot_response = random.choice(responses)
+            
             
             # Translate response back to original language if needed
             if language != 'en':
                 try:
-                    bot_response = GoogleTranslator(source='en', target=language).translate(bot_response)
-                except Exception as translation_error:
-                    logger.warning(f"Translation error: {translation_error}")
+                    bot_response = translate_text(bot_response, source_lang='en', target_lang=language)
+                    logger.info(f"Translated bot response: first 100 chars - {bot_response[:100]}...")
+                except Exception as e:
+                    logger.error(f"Error translating bot response: {e}")
+                    # Keep English response if translation fails
             
             # Fallback to existing knowledge if Gemini fails
             if not bot_response:
+                logger.warning("Empty response from Gemini, falling back to pre-defined responses")
                 intent, details = enhanced_intent_recognition(user_message)
                 responses = chatbot_knowledge.get(intent, chatbot_knowledge["default"])
                 bot_response = random.choice(responses)
@@ -295,9 +508,9 @@ def chat():
                 # Translate fallback response if needed
                 if language != 'en':
                     try:
-                        bot_response = GoogleTranslator(source='en', target=language).translate(bot_response)
-                    except Exception as translation_error:
-                        logger.warning(f"Translation error: {translation_error}")
+                        bot_response = translate_text(bot_response, source_lang='en', target_lang=language)
+                    except Exception as e:
+                        logger.error(f"Error translating fallback response: {e}")
             
             return jsonify({"response": bot_response})
         
@@ -312,9 +525,9 @@ def chat():
             # Translate fallback response if needed
             if language != 'en':
                 try:
-                    bot_response = GoogleTranslator(source='en', target=language).translate(bot_response)
-                except Exception as translation_error:
-                    logger.warning(f"Translation error: {translation_error}")
+                    bot_response = translate_text(bot_response, source_lang='en', target_lang=language)
+                except Exception as e:
+                    logger.error(f"Error translating fallback response: {e}")
 
             if intent == "crop_recommendations":
                 bot_response += " <a href='/crop-recommendation'>Try our crop recommendation tool!</a>"
@@ -326,9 +539,6 @@ def chat():
     except Exception as e:
         logger.error(f"Error in chat API: {e}")
         return jsonify({"error": str(e)}), 500
-
-
-
 
 @app.route('/crop-recommendation')
 def crop_recommendation():

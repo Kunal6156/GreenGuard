@@ -281,6 +281,103 @@
             background-color: #4CAF50;
             color: white;
         }
+        
+        /* Voice Integration UI */
+        .voice-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .voice-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .voice-btn:hover {
+            background-color: #43a047;
+            transform: scale(1.05);
+        }
+        
+        .voice-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .voice-btn.listening {
+            animation: pulse 1.5s infinite;
+            background-color: #F44336;
+        }
+        
+        .voice-status {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            height: 20px;
+            margin-top: 5px;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+        
+        #speechOutput {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .voice-animation {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+        }
+        
+        .sound-wave {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sound-wave .bar {
+            display: inline-block;
+            width: 3px;
+            margin: 0 1px;
+            background-color: white;
+            height: 10px;
+            animation: sound-wave 0ms -800ms linear infinite alternate;
+        }
+        
+        .sound-wave .bar:nth-child(1) { animation-duration: 474ms; }
+        .sound-wave .bar:nth-child(2) { animation-duration: 433ms; }
+        .sound-wave .bar:nth-child(3) { animation-duration: 407ms; }
+        .sound-wave .bar:nth-child(4) { animation-duration: 458ms; }
+        .sound-wave .bar:nth-child(5) { animation-duration: 400ms; }
+        
+        @keyframes sound-wave {
+            0% { height: 10px; }
+            100% { height: 35px; }
+        }
     </style>
 </head>
 <body>
@@ -310,7 +407,22 @@
                 <button class="language-btn" data-lang="ta">தமிழ்</button>
                 <button class="language-btn" data-lang="bn">বাংলা</button>
                 <button class="language-btn" data-lang="kn">ಕನ್ನಡ</button>
+                <button class="language-btn" data-lang="pa">ਪੰਜਾਬੀ</button>
+                <button class="language-btn" data-lang="te">తెలుగు</button>
+                <button class="language-btn" data-lang="hr">हरियाणवी</button>
+
             </div>
+            
+            <!-- Voice Controls -->
+            <div class="voice-controls">
+                <button id="micButton" class="voice-btn" aria-label="Start microphone">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="speakerButton" class="voice-btn" aria-label="Adjust volume">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+            <div class="voice-status" id="voiceStatus"></div>
             
             <p>Ask me about crops, diseases, farming practices, or get personalized assistance for your farm.</p>
             
@@ -338,6 +450,8 @@
             </div>
         </div>
     </div>
+    
+    <div id="speechOutput"></div>
     
     <div class="container">
         <div class="footer-content">
@@ -385,6 +499,26 @@
             const sendBtn = document.getElementById('sendBtn');
             const languageButtons = document.querySelectorAll('.language-btn');
             const suggestionsList = document.getElementById('suggestionsList');
+            const micButton = document.getElementById('micButton');
+            const speakerButton = document.getElementById('speakerButton');
+            const voiceStatus = document.getElementById('voiceStatus');
+            const speechOutput = document.getElementById('speechOutput');
+
+            // Speech recognition setup
+            let recognition = null;
+            let isListening = false;
+            let speechEnabled = false;
+            
+            // Check if SpeechRecognition is supported
+            if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                speechEnabled = true;
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+            } else {
+                voiceStatus.textContent = "Voice input not supported in this browser";
+                micButton.disabled = true;
+            }
 
             // Multilingual Suggestions
             const suggestions = {
@@ -417,6 +551,24 @@
                     'ಸಸ್ಯಗಳ ರೋಗಗಳನ್ನು ಹೇಗೆ ಗುರುತಿಸಬಹುದು?',
                     'ಮಣ್ಣಿನ ಆರೋಗ್ಯಕ್ಕೆ ಕೆಲವು ಸಲಹೆಗಳೇನು?',
                     'ಹೊಸ ಬೆಳೆ ಉತ್ಪಾದನೆಯ ಅಭ್ಯಾಸಗಳು?'
+                ],
+                pa: [
+                    'ਮੇਰੀ ਜ਼ਮੀਨ ਲਈ ਕਿਹੜੀਆਂ ਫਸਲਾਂ ਢੁਕਵੀਆਂ ਹੋਣਗੀਆਂ?',
+                    'ਪੌਦਿਆਂ ਦੀਆਂ ਬਿਮਾਰੀਆਂ ਦੀ ਪਛਾਣ ਕਿਵੇਂ ਕਰਾਂ?',
+                    'ਮਿੱਟੀ ਦੀ ਸਿਹਤ ਲਈ ਕੁਝ ਸੁਝਾਅ?',
+                    'ਜੈਵਿਕ ਖੇਤੀ ਲਈ ਸਭ ਤੋਂ ਵਧੀਆ ਤਰੀਕੇ?'
+                ],
+                te: [
+                    'నా భూమికి ఏ పంటలు సరిపోతాయి?',
+                    'మొక్క వ్యాధులను ఎలా గుర్తించగలను?',
+                    'మట్టి ఆరోగ్యానికి కొన్ని చిట్కాలు?',
+                    'సేంద్రీయ వ్యవసాయానికి ఉత్తమ పద్ధతులు?'
+                ],
+                hr: [
+                     'म्हारी जमीन के लिए कौण सी फसलां ठीक रहैंगी?',
+                      'पौधों की बीमारियों का कैसे पता लगाऊं?',
+                      'मिट्टी की सेहत के लिए क्या सुझाव हैं?',
+                      'जैविक खेती के बढ़िया तरीके?'
                 ]
             };
 
@@ -424,125 +576,337 @@
             const localizedMessages = {
                 en: {
                     welcome: "Hello! I'm your GreenGuard AI assistant. How can I help with your farming needs today?",
-                    errorMessage: 'Sorry, I encountered an error. Please try again later.'
+                    errorMessage: 'Sorry, I encountered an error. Please try again later.',
+                    listeningStart: 'Listening...',
+                    listeningStop: 'Voice recognition stopped.',
+                    listeningError: 'Error recognizing speech. Please try again.',
+                    speakingStart: 'Speaking...',
+                    speakingStop: 'Finished speaking.',
+                    noSpeechSupport: 'Speech synthesis not supported in this browser.'
                 },
                 hi: {
                     welcome: 'नमस्ते! मैं आपका GreenGuard AI सहायक हूँ। आज आपकी खेती की जरूरतों में मैं कैसे मदद कर सकता हूँ?',
-                    errorMessage: 'क्षमा करें, मुझे एक त्रुटि मिली। कृपया बाद में पुनः प्रयास करें।'
+                    errorMessage: 'क्षमा करें, मुझे एक त्रुटि मिली। कृपया बाद में पुनः प्रयास करें।',
+                    listeningStart: 'सुन रहा हूँ...',
+                    listeningStop: 'आवाज पहचानना बंद किया।',
+                    listeningError: 'आवाज पहचानने में त्रुटि। कृपया पुनः प्रयास करें।',
+                    speakingStart: 'बोल रहा हूँ...',
+                    speakingStop: 'बोलना समाप्त।',
+                    noSpeechSupport: 'इस ब्राउज़र में स्पीच सिंथेसिस समर्थित नहीं है।'
                 },
                 ta: {
                     welcome: 'வணக்கம்! நான் உங்கள் GreenGuard AI உதவியாளர். இன்று உங்கள் வேளாண் தேவைகளில் எப்படி உதவ முடியும்?',
-                    errorMessage: 'மன்னிக்கவும், ஒரு பிழை ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.'
+                    errorMessage: 'மன்னிக்கவும், ஒரு பிழை ஏற்பட்டது. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
+                    listeningStart: 'கேட்கிறேன்...',
+                    listeningStop: 'குரல் அங்கீகாரம் நிறுத்தப்பட்டது.',
+                    listeningError: 'பேச்சை அங்கீகரிப்பதில் பிழை. தயவு செய்து மீண்டும் முயற்சிக்கவும்.',
+                    speakingStart: 'பேசுகிறேன்...',
+                    speakingStop: 'பேசுவது முடிந்தது.',
+                    noSpeechSupport: 'இந்த உலாவியில் பேச்சு தொகுப்பு ஆதரிக்கப்படவில்லை.'
                 },
                 bn: {
                     welcome: 'হ্যালো! আমি আপনার GreenGuard AI সহায়ক। আজ আপনার কৃষি চাহিদায় কীভাবে সাহায্য করতে পারি?',
-                    errorMessage: 'দুঃখিত, একটি ত্রুটি ঘটেছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।'
+                    errorMessage: 'দুঃখিত, একটি ত্রুটি ঘটেছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।',
+                    listeningStart: 'শুনছি...',
+                    listeningStop: 'কণ্ঠস্বর স্বীকৃতি বন্ধ করা হয়েছে।',
+                    listeningError: 'বক্তৃতা স্বীকৃতিতে ত্রুটি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+                    speakingStart: 'কথা বলছি...',
+                    speakingStop: 'কথা বলা শেষ।',
+                    noSpeechSupport: 'এই ব্রাউজারে স্পিচ সিন্থেসিস সমর্থিত নয়।'
                 },
                 kn: {
                     welcome: 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ GreenGuard AI ಸಹಾಯಕ. ಇಂದು ನಿಮ್ಮ ಕೃಷಿ ಅಗತ್ಯಗಳಲ್ಲಿ ಹೇಗೆ ನೆರವಾಗಬಹುದು?',
-                    errorMessage: 'ಕ್ಷಮಿಸಿ, ಒಂದು ದೋಷ ಎದುರಾಗಿದೆ. ದಯವಿಟ್ಟು ಮೊದಲಿನಂತೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.'
-                }
+                    errorMessage: 'ಕ್ಷಮಿಸಿ, ಒಂದು ದೋಷ ಎದುರಾಗಿದೆ. ದಯವಿಟ್ಟು ಮೊದಲಿನಂತೆ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+                    listeningStart: 'ಕೇಳುತ್ತಿದ್ದೇನೆ...',
+                    listeningStop: 'ಧ್ವನಿ ಗುರುತಿಸುವಿಕೆ ನಿಲ್ಲಿಸಲಾಗಿದೆ.',
+                    listeningError: 'ಮಾತನ್ನು ಗುರುತಿಸುವಲ್ಲಿ ದೋಷ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+                    speakingStart: 'ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ...',
+                    speakingStop: 'ಮಾತನಾಡುವುದು ಮುಗಿದಿದೆ.',
+                    noSpeechSupport: 'ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಸ್ಪೀಚ್ ಸಿಂಥೆಸಿಸ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.'
+                },
+                pa: {
+                    welcome: 'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ GreenGuard AI ਸਹਾਇਕ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀਆਂ ਖੇਤੀਬਾੜੀ ਲੋੜਾਂ ਵਿੱਚ ਕਿਵੇਂ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?',
+                    errorMessage: 'ਮਾਫ਼ ਕਰਨਾ, ਇੱਕ ਗਲਤੀ ਹੋਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
+                    listeningStart: 'ਸੁਣ ਰਿਹਾ ਹਾਂ...',
+                    listeningStop: 'ਆਵਾਜ਼ ਪਛਾਣ ਬੰਦ ਕੀਤੀ ਗਈ।',
+                    listeningError: 'ਭਾਸ਼ਣ ਪਛਾਣ ਵਿੱਚ ਗਲਤੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।',
+                    speakingStart: 'ਬੋਲ ਰਿਹਾ ਹਾਂ...',
+                    speakingStop: 'ਬੋਲਣਾ ਖਤਮ।',
+                    noSpeechSupport: 'ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਿੱਚ ਸਪੀਚ ਸਿੰਥੈਸਿਸ ਸਮਰਥਿਤ ਨਹੀਂ ਹੈ।'
+                },
+                te: {
+                    welcome: 'నమస్కారం! నేను మీ GreenGuard AI సహాయకుడిని. ఈరోజు మీ వ్యవసాయ అవసరాలలో నేను ఎలా సహాయపడగలను?',
+                    errorMessage: 'క్షమించండి, ఒక లోపం సంభవించింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.',
+                    listeningStart: 'వింటున్నాను...',
+                    listeningStop: 'వాయిస్ రికగ్నిషన్ ఆపివేయబడింది.',
+                    listeningError: 'స్పీచ్ రికగ్నిషన్‌లో లోపం. దయచేసి మళ్ళీ ప్రయత్నించండి.',
+                    speakingStart: 'మాట్లాడుతున్నాను...',
+                    speakingStop: 'మాట్లాడటం ముగిసింది.',
+                    noSpeechSupport: 'ఈ బ్రౌజర్‌లో స్పీచ్ సింథసిస్ మద్దతు లేదు.'
+                },
+                hr: {
+                    welcome: 'नमस्कार! मैं थारा GreenGuard AI सहायक हूँ। आज थारी खेती की जरूरतां में मैं कैसे मदद कर सकूं?',
+                    errorMessage: 'माफ करियो, मन्नै एक दिक्कत मिली। फेर कोशिश करियो।',
+                    listeningStart: 'सुण रहा हूँ...',
+                    listeningStop: 'आवाज पहचानना बंद करदिया।',
+                    listeningError: 'आवाज पहचानने में दिक्कत। फेर कोशिश करियो।',
+                    speakingStart: 'बोल रहा हूँ...',
+                    speakingStop: 'बोलना खतम।',
+                    noSpeechSupport: 'इस ब्राउज़र में स्पीच सिंथेसिस काम नहीं करै।'
+                   }
             };
 
             let currentLanguage = 'en';
 
-            // Function to update suggestions and welcome message
-            function updateLanguage(lang) {
-                currentLanguage = lang;
-                suggestionsList.innerHTML = '';
-                suggestions[lang].forEach(suggestion => {
-                    const li = document.createElement('li');
-                    li.textContent = suggestion;
-                    li.onclick = () => {
-                        userInput.value = suggestion;
-                        userInput.focus();
-                    };
-                    suggestionsList.appendChild(li);
-                });
+            // Speech recognition event setup
+            if (speechEnabled) {
+                recognition.onstart = function() {
+                    isListening = true;
+                    voiceStatus.textContent = localizedMessages[currentLanguage].listeningStart;
+                    micButton.classList.add('listening');
+                    
+                    // Show speech animation
+                    speechOutput.innerHTML = `
+                    <div class="voice-animation">
+                        <div class="sound-wave">
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                        </div>
+                    </div>`;
+                    speechOutput.style.display = "block";
+                };
 
-                // Reset chat with welcome message in selected language
-                chatMessages.innerHTML = `
-                    <div class="message bot-message">
-                        ${localizedMessages[lang].welcome}
-                    </div>
-                    <div class="clear"></div>
-                `;
+                recognition.onend = function() {
+                    isListening = false;
+                    voiceStatus.textContent = localizedMessages[currentLanguage].listeningStop;
+                    micButton.classList.remove('listening');
+                    setTimeout(() => {
+                        voiceStatus.textContent = "";
+                    }, 2000);
+                    
+                    // Hide speech animation
+                    speechOutput.style.display = "none";
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    userInput.value = transcript;
+                    sendMessage();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error', event.error);
+                    voiceStatus.textContent = localizedMessages[currentLanguage].listeningError;
+                    micButton.classList.remove('listening');
+                    speechOutput.style.display = "none";
+                };
             }
 
-            // Language button event listeners
-            languageButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    languageButtons.forEach(b => b.classList.remove('active'));
+            // Function to speak text using the Web Speech API
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
                     
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    
-                    // Update language
-                    updateLanguage(this.dataset.lang);
-                });
-            });
-
-            // Initial language setup
-            updateLanguage('en');
-
-            // Function to add a message to the chat
-            function addMessage(message, isUser) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-                messageDiv.innerHTML = message;
-                
-                const sourceDiv = document.createElement('div');
-                sourceDiv.className = 'ai-source';
-                sourceDiv.innerHTML = isUser ? '' : '<span class="gemini-badge">Gemini</span>';
-                
-                chatMessages.appendChild(messageDiv);
-                chatMessages.appendChild(sourceDiv);
-                chatMessages.appendChild(document.createElement('div')).className = 'clear';
-                
-                // Auto scroll to the bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }
-            
-            // Function to send message to server
-            async function sendMessage() {
-                const message = userInput.value.trim();
-                if (!message) return;
-                
-                // Add user message to chat
-                addMessage(message, true);
-                
-                // Clear input
-                userInput.value = '';
-                
-                try {
-                    // Send message to Flask backend
-                    const response = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 
-                            message: message,
-                            language: currentLanguage 
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                    // Set language based on current selected language
+                    switch(currentLanguage) {
+                        case 'hi': utterance.lang = 'hi-IN'; break;
+                        case 'ta': utterance.lang = 'ta-IN'; break;
+                        case 'bn': utterance.lang = 'bn-IN'; break;
+                        case 'kn': utterance.lang = 'kn-IN'; break;
+                        case 'pa': utterance.lang = 'pa-IN'; break;  // Added Punjabi
+                        case 'te': utterance.lang = 'te-IN'; break;  // Added Telugu
+                        default: utterance.lang = 'en-US';
                     }
                     
-                    const data = await response.json();
+                    voiceStatus.textContent = localizedMessages[currentLanguage].speakingStart;
                     
-                    // Add bot response to chat
-                    addMessage(data.response, false);
-                } catch (error) {
-                    console.error('Error:', error);
-                    addMessage(localizedMessages[currentLanguage].errorMessage, false);
+                    utterance.onend = function() {
+                        voiceStatus.textContent = localizedMessages[currentLanguage].speakingStop;
+                        setTimeout(() => {
+                            voiceStatus.textContent = "";
+                        // Continue the script from where it was cut off
+
+                    }, 2000);
+                    };
+                    
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    voiceStatus.textContent = localizedMessages[currentLanguage].noSpeechSupport;
                 }
             }
+
+            // Set up Gemini AI
+            const API_KEY = "AIzaSyBVB6h2kLUybM4PdI_Jq2vMTqTfxtLBLT4"; // Replace with your actual Gemini API key
+            let genAI;
+            let geminiModel;
+
+            try {
+                genAI = new GoogleGenerativeAI(API_KEY);
+                geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+            } catch (error) {
+                console.error("Error initializing Gemini:", error);
+            }
+
+            function formatMessageText(text) {
+    // Convert **bold** text
+    text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    // Convert *italic* text
+    text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+    // Convert bullet points
+    text = text.replace(/\n\* (.*?)/g, "<li>$1</li>");
+    
+    // Wrap bullet points in <ul> tags if they exist
+    if (text.includes("<li>")) {
+        text = "<ul>" + text + "</ul>";
+    }
+
+    // Convert new lines to <br> for readability
+    text = text.replace(/\n/g, "<br>");
+
+    return text;
+}
+
+            // Add message to chat
+            function addMessage(message, isUser = false) {
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    
+    // Apply formatting only for bot responses
+    messageElement.innerHTML = isUser ? message : formatMessageText(message);
+    
+    chatMessages.appendChild(messageElement);
+
+    // Ensure proper scrolling
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+            // Send message to AI and get response
+            async function getAIResponse(message) {
+    try {
+        const prompt = `You are GreenGuard, an agricultural AI assistant. 
+        Respond to this user query about farming, crops, or agricultural practices in ${
+            currentLanguage === 'en' ? 'English' : 
+            currentLanguage === 'hi' ? 'Hindi' : 
+            currentLanguage === 'ta' ? 'Tamil' : 
+            currentLanguage === 'bn' ? 'Bengali' : 
+            currentLanguage === 'kn' ? 'Kannada' : 
+            currentLanguage === 'pa' ? 'Punjabi' :  
+            currentLanguage === 'te' ? 'Telugu' :  
+            currentLanguage === 'hr' ? 'Haryanvi' :  
+            'English'
+        }.
+        Be helpful, concise, and knowledgeable about agricultural topics.
+        Query: ${message}`;
+
+        const response = await fetch('/api/chat', {  // Call Flask API
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                message: prompt,  // Send formatted prompt instead of raw message
+                language: currentLanguage  // Send selected language
+            })
+        });
+
+        const data = await response.json();  // Get AI response
+        return data.response;  // Extract AI-generated response text
+
+    } catch (error) {
+        console.error("Error getting AI response:", error);
+        return "Sorry, something went wrong. Please try again.";
+    }
+}
+            // Send message function
+            async function sendMessage() {
+                const message = userInput.value.trim();
+                if (message !== '') {
+                    // Add user message to chat
+                    addMessage(message, true);
+                    userInput.value = '';
+                    userInput.focus();
+                    
+                    // Show typing indicator
+                    const typingElement = document.createElement('div');
+                    typingElement.className = 'message bot-message';
+                    typingElement.textContent = '...';
+                    chatMessages.appendChild(typingElement);
+                    const clearElement = document.createElement('div');
+                    clearElement.className = 'clear';
+                    chatMessages.appendChild(clearElement);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    // Get AI response
+                    const response = await getAIResponse(message);
+                    
+                    // Remove typing indicator
+                    chatMessages.removeChild(typingElement);
+                    chatMessages.removeChild(clearElement);
+                    
+                    // Add AI response to chat
+                    addMessage(response);
+                    
+                    // If text-to-speech is active, speak the response
+                    if (isSpeakerActive) {
+                        speakText(response);
+                    }
+                }
+            }
+
+            // Initialize suggestions based on current language
+            function updateSuggestions() {
+                suggestionsList.innerHTML = '';
+                suggestions[currentLanguage].forEach(suggestion => {
+                    const li = document.createElement('li');
+                    li.textContent = suggestion;
+                    li.addEventListener('click', () => {
+                        userInput.value = suggestion;
+                        sendMessage();
+                    });
+                    suggestionsList.appendChild(li);
+                });
+            }
+
+            // Update UI text based on selected language
+            function updateUILanguage() {
+                // Update welcome message if it's the only message in the chat
+                if (chatMessages.children.length === 2) { // Message + clear div
+                    chatMessages.children[0].textContent = localizedMessages[currentLanguage].welcome;
+                }
+                
+                // Update placeholder text
+                if (currentLanguage === 'en') userInput.placeholder = "Type your message here...";
+                else if (currentLanguage === 'hi') userInput.placeholder = "अपना संदेश यहां टाइप करें...";
+                else if (currentLanguage === 'ta') userInput.placeholder = "உங்கள் செய்தியை இங்கே தட்டச்சு செய்யவும்...";
+                else if (currentLanguage === 'bn') userInput.placeholder = "এখানে আপনার বার্তা টাইপ করুন...";
+                else if (currentLanguage === 'kn') userInput.placeholder = "ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ಇಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ...";
+                else if (currentLanguage === 'pa') userInput.placeholder = "ਆਪਣਾ ਸੁਨੇਹਾ ਇੱਥੇ ਟਾਈਪ ਕਰੋ...";  // Added Punjabi
+                else if (currentLanguage === 'te') userInput.placeholder = "మీ సందేశాన్ని ఇక్కడ టైప్ చేయండి...";
+                else if (currentLanguage === 'hr') userInput.placeholder = "अपना संदेश यहां टाइप करो...";  // Added Telugu
+                
+                // Update send button text
+                if (currentLanguage === 'en') sendBtn.textContent = "Send";
+                else if (currentLanguage === 'hi') sendBtn.textContent = "भेजें";
+                else if (currentLanguage === 'ta') sendBtn.textContent = "அனுப்பு";
+                else if (currentLanguage === 'bn') sendBtn.textContent = "পাঠান";
+                else if (currentLanguage === 'kn') sendBtn.textContent = "ಕಳುಹಿಸಿ";
+                else if (currentLanguage === 'pa') sendBtn.textContent = "ਭੇਜੋ";  // Added Punjabi
+                else if (currentLanguage === 'te') sendBtn.textContent = "పంపు";
+                else if (currentLanguage === 'hr') sendBtn.textContent = "भेजो";  // Added Telugu
+            }
+
+            // Initialize with English
+            updateSuggestions();
             
-            // Event listeners
+            // Track speaker state
+            let isSpeakerActive = false;
+            
+            // Event Listeners
             sendBtn.addEventListener('click', sendMessage);
             
             userInput.addEventListener('keypress', function(e) {
@@ -550,10 +914,87 @@
                     sendMessage();
                 }
             });
-            
-            // Focus input on load
-            userInput.focus();
+
+            // Language selector
+            languageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    languageButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Set current language
+                    currentLanguage = this.getAttribute('data-lang');
+                    // Update suggestions
+                    updateSuggestions();
+                    // Update UI text
+                    updateUILanguage();
+                    
+                    // If speech recognition is active, stop it and restart with new language
+                    if (isListening && recognition) {
+                        recognition.stop();
+                        // Set recognition language
+                        switch(currentLanguage) {
+                            case 'hi': recognition.lang = 'hi-IN'; break;
+                            case 'ta': recognition.lang = 'ta-IN'; break;
+                            case 'bn': recognition.lang = 'bn-IN'; break;
+                            case 'kn': recognition.lang = 'kn-IN'; break;
+                            case 'pa': recognition.lang = 'pa-IN'; break;  // Added Punjabi
+                            case 'te': recognition.lang = 'te-IN'; break;
+                            case 'hr': recognition.lang = 'hi-IN'; break;  // Added Telugu
+                            default: recognition.lang = 'en-US';
+                        }
+                        setTimeout(() => {
+                            recognition.start();
+                        }, 200);
+                    }
+                });
+            });
+
+            // Microphone button
+            micButton.addEventListener('click', function() {
+                if (speechEnabled) {
+                    if (!isListening) {
+                        // Set recognition language based on current UI language
+                        switch(currentLanguage) {
+                            case 'hi': recognition.lang = 'hi-IN'; break;
+                            case 'ta': recognition.lang = 'ta-IN'; break;
+                            case 'bn': recognition.lang = 'bn-IN'; break;
+                            case 'kn': recognition.lang = 'kn-IN'; break;
+                            default: recognition.lang = 'en-US';
+                        }
+                        recognition.start();
+                    } else {
+                        recognition.stop();
+                    }
+                } else {
+                    voiceStatus.textContent = "Voice input not supported in this browser";
+                    setTimeout(() => {
+                        voiceStatus.textContent = "";
+                    }, 2000);
+                }
+            });
+
+            // Speaker button
+            speakerButton.addEventListener('click', function() {
+                isSpeakerActive = !isSpeakerActive;
+                if (isSpeakerActive) {
+                    speakerButton.style.backgroundColor = "#F44336";
+                    // If there's already a bot message, speak the last one
+                    const botMessages = document.querySelectorAll('.bot-message');
+                    if (botMessages.length > 0) {
+                        const lastMessage = botMessages[botMessages.length - 1].textContent;
+                        speakText(lastMessage);
+                    }
+                } else {
+                    speakerButton.style.backgroundColor = "#4CAF50";
+                    // Stop any ongoing speech
+                    if ('speechSynthesis' in window) {
+                        window.speechSynthesis.cancel();
+                    }
+                }
+            });
         });
 </script>
+
 </body>
 </html>
