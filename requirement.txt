@@ -1,9 +1,12 @@
 flask
 numpy
-tensorflow-cpu  # Use tensorflow-cpu to reduce deployment size
+tensorflow-cpu
 opencv-python-headless
 scikit-learn
 pillow
 google-generativeai
 requests
 gunicorn
+deep_translator
+werkzeug
+pickle-mixin
