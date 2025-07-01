@@ -467,7 +467,7 @@ def chat():
         
         try:
             # Use Gemini for generating responses
-            model = genai.GenerativeModel('gemini-1.5-pro-latest')
+            model = genai.GenerativeModel('gemini-1.5-flash')
             prompt = f"""
             You are an AI agricultural assistant for GreenGuard. 
             Provide helpful, concise advice about farming, crops, soil health, and agricultural practices. 
