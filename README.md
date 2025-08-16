@@ -67,6 +67,7 @@ This project is a web-based application that provides crop recommendations based
 
 ## Contributors
 - **Kunal** (Project Developer)
+- **Vaibhav Gupta** (Project Developer)
 
 ## License
 This project is licensed under the MIT License.
